@@ -6,7 +6,7 @@ using System.Linq;
 public class Walker : MonoBehaviour
 {
     
-    public float runSpeed { get { return _runSpeed; } set { _runSpeed = value; _posOffset = 0.5f * value; } }
+    public float runSpeed { get { return _runSpeed; } set { _runSpeed = value; _posOffset = 0.4f * value; } }
     public Vector3 direction { get { return _dir; } }
     public bool ReachDestionation
     {
@@ -28,7 +28,7 @@ public class Walker : MonoBehaviour
     //[HideInInspector]
     public bool isStopped;
 
-    private NodeGrid _grid;
+    public NodeGrid grid;
     private List<Node> _path;
     private Node actualNode;
     private int nodeIndex;
@@ -38,11 +38,15 @@ public class Walker : MonoBehaviour
     private Vector3 _dir;
     private bool _reachDestionation;
 
+    private int _positionCount;
+    private float _lastDist;
+
     private Collider[] obstacles;
 
 	void Start ()
     {
-        _grid = FindObjectOfType<NodeGrid>();
+        if(!grid)
+            grid = FindObjectOfType<NodeGrid>();
         _path = new List<Node>();
     }
 	
@@ -69,8 +73,16 @@ public class Walker : MonoBehaviour
                     nodeIndex++;
                     actualNode = _path[nodeIndex];
                 }
-                var dist = (transform.position - _finalDestionation).sqrMagnitude;
-                if (dist > _posOffset)
+                var distToNode = (transform.position - _finalDestionation).sqrMagnitude;
+                if(Mathf.Abs(_lastDist - distToNode) < 0.1f)
+                {
+                    _positionCount++;
+                }
+                else
+                {
+                    _positionCount = 0;
+                }
+                if (distToNode > _posOffset && _positionCount < 4)
                 {
                     _dir = (actualNode.position - transform.position).normalized;
                     _dir.y = 0;
@@ -81,7 +93,10 @@ public class Walker : MonoBehaviour
                 {
                     isStopped = true;
                     _reachDestionation = true;
+                    _positionCount = 0;
                 }
+
+                _lastDist = distToNode;
             }
         }
 
@@ -104,10 +119,16 @@ public class Walker : MonoBehaviour
     {
         isStopped = false;
         _finalDestionation = destination;
-        _path = PathFinding.GetAStarPath(transform.position, destination, _grid);
+        _path = PathFinding.GetAStarPath(transform.position, destination, grid);
         nodeIndex = 0;
         if(_path != null && _path.Count>0)
             actualNode = _path[0];
+    }
+
+    public void Stop()
+    {
+        isStopped = true;
+        _finalDestionation = transform.position;
     }
 
     private void OnDrawGizmos()
@@ -117,7 +138,7 @@ public class Walker : MonoBehaviour
             Gizmos.color = Color.green;
             foreach (var node in _path)
             {
-                Gizmos.DrawSphere(node.position, _grid.nodeRadius);
+                Gizmos.DrawSphere(node.position, grid.nodeRadius);
             }
         }
         if(avoidDistance > 0)

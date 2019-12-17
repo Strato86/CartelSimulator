@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     public float initialMoney;
     public string initialWeapon;
     public bool initialHasAgreement;
+    public float speed;
 
     [Header("Money Values")]
     public float mariaSellPrice;
@@ -42,22 +43,36 @@ public class PlayerController : MonoBehaviour
     public Transform capitolioSpot;
     public Transform workSpot;
     public Transform kidnapHouse;
+    public Transform[] stealSpot;
+
+    [Header("Side Logic references")]
+    public MariaController mariaController;
+    public GameObject macri;
+    public GameObject gun;
+    public WeedheadController weedhead;
+    public ParticleSystem moneyPS;
+    public ParticleSystem mariaPS;
+    public ParticleSystem seedPS;
+    public ParticleSystem gunPS;
+    public ParticleSystem accordPS;
+    public LabController lab;
     
     const string WEAPON_GUN = "gun";
     const string WEAPON_KNIFE = "knife";
 
     private Queue<Tuple<string,WorldModel>> _actionQueue;
     private Walker _walker;
+    private UIController _ui;
+    private int stealCount;
+
     void Start()
     {
+        _ui = GetComponent<UIController>();
         _walker = GetComponent<Walker>();
-        _walker.runSpeed = 10;
+        _walker.runSpeed = speed;
+        macri.SetActive(false);
+        gun.SetActive(false);
         Plan();
-    }
-
-    void Update()
-    {
-
     }
 
     void Plan()
@@ -68,6 +83,8 @@ public class PlayerController : MonoBehaviour
         initialModel.money = initialMoney;
         initialModel.weapon = initialWeapon;
         initialModel.hasAgreement = initialHasAgreement;
+
+        _ui.UpdateUI(initialModel);
 
         Func<WorldModel, bool> goal = (g) => g.isNarco;
 
@@ -112,6 +129,12 @@ public class PlayerController : MonoBehaviour
         }
         else
             Plan();
+    }
+
+    public void Stop()
+    {
+        StopAllCoroutines();
+        _walker.Stop();
     }
 
     List<GoapAction<WorldModel>> GetActions()
@@ -258,21 +281,28 @@ public class PlayerController : MonoBehaviour
         }
 
         yield return new WaitForSeconds(0.5f);
-
-        //TODO: BUY LAB
+        _ui.UpdateUI(wm);
+        lab.SellLab();
+        GameManager.Instance.WinGame(gameObject.name);
         
     }
 
     IEnumerator Steal(WorldModel wm)
     {
-        _walker.SetDestination(labSpot.position);
+        
+        _walker.SetDestination(stealSpot[stealCount].position);
 
         while (!_walker.ReachDestionation)
         {
             yield return null;
         }
+        stealCount++;
+        if (stealCount > 1)
+            stealCount = 0;
 
-        yield return new WaitForSeconds(0.5f);
+        moneyPS.Play();
+        yield return new WaitForSeconds(2f);
+        _ui.UpdateUI(wm);
         ExecuteAction();
         //TODO: BUY LAB
 
@@ -287,8 +317,12 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
 
+        mariaController.Grow();
+        yield return new WaitForSeconds(1.2f);
+        mariaPS.Play();
         yield return new WaitForSeconds(0.5f);
         //TODO: Maria plant animation
+        _ui.UpdateUI(wm);
         ExecuteAction();
     }
 
@@ -300,9 +334,11 @@ public class PlayerController : MonoBehaviour
         {
             yield return null;
         }
-
-        yield return new WaitForSeconds(0.5f);
+        weedhead.TurnOnCigar();
+        moneyPS.Play();
+        yield return new WaitForSeconds(2f);
         //TODO: Sell maria
+        _ui.UpdateUI(wm);
         ExecuteAction();
     }
 
@@ -314,10 +350,10 @@ public class PlayerController : MonoBehaviour
         {
             yield return null;
         }
-
-        yield return new WaitForSeconds(0.5f);
+        seedPS.Play();
+        yield return new WaitForSeconds(1f);
         //TODO: Buy Seeds
-
+        _ui.UpdateUI(wm);
         ExecuteAction();
     }
 
@@ -330,9 +366,11 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1f);
+        gunPS.Play();
         //TODO: buy weapon
-
+        gun.SetActive(true);
+        _ui.UpdateUI(wm);
         ExecuteAction();
     }
 
@@ -344,9 +382,10 @@ public class PlayerController : MonoBehaviour
         {
             yield return null;
         }
-
-        yield return new WaitForSeconds(0.5f);
+        accordPS.Play();
+        yield return new WaitForSeconds(2f);
         //TODO: DEAL WITH GOB
+        _ui.UpdateUI(wm);
         ExecuteAction();
     }
 
@@ -358,8 +397,20 @@ public class PlayerController : MonoBehaviour
         {
             yield return null;
         }
-        yield return new WaitForSeconds(0.5f);
+        while (true)
+        {
+            transform.forward = Vector3.Slerp(transform.forward, workSpot.forward, Time.deltaTime * 10);
+            if(Math.Abs(Vector3.Magnitude(transform.forward - workSpot.forward)) < 0.1)
+            {
+                transform.forward = workSpot.forward;
+                break;
+            }
+            yield return null;
+        }
+        moneyPS.Play();
+        yield return new WaitForSeconds(2f);
         //TODO: Work
+        _ui.UpdateUI(wm);
         ExecuteAction();
     }
 
@@ -372,8 +423,20 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
         yield return new WaitForSeconds(0.5f);
-        //TODO: KIDNAP
+        macri.SetActive(true);
 
+        _walker.SetDestination(kidnapHouse.position);
+        while (!_walker.ReachDestionation)
+        {
+            yield return null;
+        }
+        macri.SetActive(false);
+        moneyPS.Play();
+        accordPS.Play();
+        yield return new WaitForSeconds(2f);
+
+        //TODO: KIDNAP
+        _ui.UpdateUI(wm);
         ExecuteAction();
     }
     #endregion
