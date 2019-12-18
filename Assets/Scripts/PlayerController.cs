@@ -158,6 +158,11 @@ public class PlayerController : MonoBehaviour
                 {
                     var wm = WorldModel.Clone(x);
                     wm.seeds --;
+                    return wm;
+                })
+                .AddEffect(x =>
+                {
+                    var wm = WorldModel.Clone(x);
                     wm.maria ++;
                     return wm;
                 })
@@ -179,6 +184,11 @@ public class PlayerController : MonoBehaviour
                 {
                     var wm = WorldModel.Clone(x);
                     wm.money += mariaSellPrice;
+                    return wm;
+                }).
+                AddEffect(x =>
+                {
+                    var wm = WorldModel.Clone(x);
                     wm.maria --;
                     return wm;
                 })
@@ -190,6 +200,11 @@ public class PlayerController : MonoBehaviour
                 {
                     var wm = WorldModel.Clone(x);
                     wm.seeds ++;
+                    return wm;
+                })
+                .AddEffect(x =>
+                {
+                    var wm = WorldModel.Clone(x);
                     wm.money -= seedPrice;
                     return wm;
                 })
@@ -202,6 +217,11 @@ public class PlayerController : MonoBehaviour
                 {
                     var wm = WorldModel.Clone(x);
                     wm.money -= gunPrice;
+                    return wm;
+                })
+                .AddEffect(x => 
+                {
+                    var wm = WorldModel.Clone(x);
                     wm.weapon = WEAPON_GUN;
                     return wm;
                 })
@@ -214,6 +234,11 @@ public class PlayerController : MonoBehaviour
                 {
                     var wm = WorldModel.Clone(x);
                     wm.money -= acordPrice;
+                    return wm;
+                })
+                .AddEffect(x =>
+                {
+                    var wm = WorldModel.Clone(x);
                     wm.hasAgreement = true;
                     return wm;
                 })
@@ -236,6 +261,11 @@ public class PlayerController : MonoBehaviour
                 {
                     var wm = WorldModel.Clone(x);
                     wm.money += kidnapBounty;
+                    return wm;
+                })
+                .AddEffect(x =>
+                {
+                    var wm = WorldModel.Clone(x);
                     wm.hasAgreement = true;
                     return wm;
                 })

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -32,5 +32,16 @@ public class WorldModel
         clone.isNarco = baseModel.isNarco;
 
         return clone;
+    }
+
+    public static WorldModel UpdateValues(WorldModel wm, List<Func<WorldModel,WorldModel>> effects)
+    {
+        var newValue = Clone(wm);
+        foreach (var e in effects)
+        {
+            newValue = e(newValue);
+        }
+
+        return newValue;
     }
 }

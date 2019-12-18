@@ -56,7 +56,7 @@ public class GOAP
 
     GoapState Execute(GoapAction<WorldModel> action, GoapState state)
     {
-        WorldModel newCurrentValues = action.Effect(state.CurrentWorldModel);
+        WorldModel newCurrentValues = WorldModel.UpdateValues(state.CurrentWorldModel, action.Effects);
 
         return new GoapState(state.Actions, action, newCurrentValues, state.Goal, state.Heuristic);
     }
