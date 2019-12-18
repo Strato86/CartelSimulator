@@ -9,7 +9,7 @@ public class LazyAStar
         Node start,
         Func<Node, bool> satisfies,
         Func<Node,List<Tuple<Node,float>>> expand,
-        Func<Node,Node,float,float> heuristic,
+        Func<Node,Node,float> heuristic,
         Func<Node,Node,bool> equal)
     {
         count = 0;
@@ -59,14 +59,14 @@ public class LazyAStar
                 var tentativeCost = currentCost + childCost;
                 if (costs.ContainsKey(child) && tentativeCost > costs[child])
                 {
-                    Debug.Log("GCost: " + costs[child] + "| HCost: " + heuristic(child, current, childCost) + "| FCost: " + tentativeCost + heuristic(child, current, childCost));
+                    Debug.Log("GCost: " + costs[child] + "| HCost: " + heuristic(child, current) + "| FCost: " + tentativeCost + heuristic(child, current));
                     continue;
                 }
 
                 parents[child] = current;
                 costs[child] = tentativeCost;
-                open.Enqueue(child, tentativeCost + heuristic(child, current,childCost));
-                Debug.Log("GCost: " + costs[child] + "| HCost: " + heuristic(child, current, childCost) + "| FCost: " + (tentativeCost + heuristic(child, current, childCost)));
+                open.Enqueue(child, tentativeCost + heuristic(child, current));
+                Debug.Log("GCost: " + costs[child] + "| HCost: " + heuristic(child, current) + "| FCost: " + (tentativeCost + heuristic(child, current)));
             }
 
             yield return Tuple.Create(satisfies(current),

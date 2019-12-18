@@ -47,22 +47,22 @@ public class GOAP
             if (!preconditionsNotSuccess)
             {
                 var newState = Execute(action, state);
-                list.Add(Tuple.Create(newState, newState.Heuristic(newState.CurrentWorldModel, state.CurrentWorldModel, action.Cost)));
+                list.Add(Tuple.Create(newState, newState.Heuristic(newState.CurrentWorldModel, state.CurrentWorldModel) + action.Cost));
             }
         }
 
         return list.OrderBy(i => i.Item2).ToList();
     }
 
-    GoapState Execute(GoapAction<WorldModel> action, GoapState state)
+    GoapState Execute(GoapAction action, GoapState state)
     {
         WorldModel newCurrentValues = WorldModel.UpdateValues(state.CurrentWorldModel, action.Effects);
 
         return new GoapState(state.Actions, action, newCurrentValues, state.Goal, state.Heuristic);
     }
 
-    float Heuristic(GoapState newState, GoapState oldState, float cost)
+    float Heuristic(GoapState newState, GoapState oldState)
     {
-        return newState.Heuristic(newState.CurrentWorldModel, oldState.CurrentWorldModel,cost);
+        return newState.Heuristic(newState.CurrentWorldModel, oldState.CurrentWorldModel);
     }
 }

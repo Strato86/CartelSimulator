@@ -134,14 +134,15 @@ public class PlayerController : MonoBehaviour
     public void Stop()
     {
         StopAllCoroutines();
-        _walker.Stop();
+        if(_walker)
+            _walker.Stop();
     }
 
-    List<GoapAction<WorldModel>> GetActions()
+    List<GoapAction> GetActions()
     {
-        var listOfActions = new List<GoapAction<WorldModel>>()
+        var listOfActions = new List<GoapAction>()
         {
-            new GoapAction<WorldModel>(PlayerActionKey.GetLab)
+            new GoapAction(PlayerActionKey.GetLab)
                 .AddPrecondition(x => x.hasAgreement == true)
                 .AddPrecondition(x => x.money == 400)
                 .AddEffect(x => 
@@ -152,7 +153,7 @@ public class PlayerController : MonoBehaviour
                 })
                 .AddCost(beNarcoCost),
 
-            new GoapAction<WorldModel>(PlayerActionKey.PlantMaria)
+            new GoapAction(PlayerActionKey.PlantMaria)
                 .AddPrecondition(x => x.seeds > 0)
                 .AddEffect(x =>
                 {
@@ -168,7 +169,7 @@ public class PlayerController : MonoBehaviour
                 })
                 .AddCost(plantMariaCost),
 
-            new GoapAction<WorldModel>(PlayerActionKey.Steal)
+            new GoapAction(PlayerActionKey.Steal)
                 .AddPrecondition(x => x.weapon == WEAPON_KNIFE)
                 .AddEffect(x =>
                 {
@@ -176,9 +177,15 @@ public class PlayerController : MonoBehaviour
                     wm.money += stealBounty;
                     return wm;
                 })
+                .AddEffect(x =>
+                {
+                    var wm = WorldModel.Clone(x);
+                    wm.stealCount ++;
+                    return wm;
+                })
                 .AddCost(stealCost),
 
-            new GoapAction<WorldModel>(PlayerActionKey.SellMaria)
+            new GoapAction(PlayerActionKey.SellMaria)
                 .AddPrecondition(x => x.maria >= 1)
                 .AddEffect(x =>
                 {
@@ -194,7 +201,7 @@ public class PlayerController : MonoBehaviour
                 })
                 .AddCost(sellMariaCost),
 
-            new GoapAction<WorldModel>(PlayerActionKey.GetSeed)
+            new GoapAction(PlayerActionKey.GetSeed)
                 .AddPrecondition(x => x.money >= seedPrice)
                 .AddEffect(x =>
                 {
@@ -210,7 +217,7 @@ public class PlayerController : MonoBehaviour
                 })
                 .AddCost(getSeedCost),
 
-            new GoapAction<WorldModel>(PlayerActionKey.BuyGun)
+            new GoapAction(PlayerActionKey.BuyGun)
                 .AddPrecondition(x => x.money >= gunPrice)
                 .AddPrecondition(x => x.weapon != WEAPON_GUN)
                 .AddEffect(x =>
@@ -227,7 +234,7 @@ public class PlayerController : MonoBehaviour
                 })
                 .AddCost(buyGunCost),
 
-            new GoapAction<WorldModel>(PlayerActionKey.DealGob)
+            new GoapAction(PlayerActionKey.DealGob)
                 .AddPrecondition(x => x.money >= acordPrice)
                 .AddPrecondition(x => x.hasAgreement == false)
                 .AddEffect(x =>
@@ -244,8 +251,7 @@ public class PlayerController : MonoBehaviour
                 })
                 .AddCost(gobAgreementCost),
 
-            new GoapAction<WorldModel>(PlayerActionKey.Work)
-                .AddPrecondition(x => x.money < seedPrice)
+            new GoapAction(PlayerActionKey.Work)
                 .AddEffect(x =>
                 {
                     var wm = WorldModel.Clone(x);
@@ -254,7 +260,7 @@ public class PlayerController : MonoBehaviour
                 })
                 .AddCost(gobAgreementCost),
 
-            new GoapAction<WorldModel>(PlayerActionKey.Kidnap)
+            new GoapAction(PlayerActionKey.Kidnap)
                 .AddPrecondition(x => x.weapon == WEAPON_GUN)
                 .AddPrecondition(x => x.hasAgreement == false)
                 .AddEffect(x =>
@@ -276,7 +282,7 @@ public class PlayerController : MonoBehaviour
         return listOfActions;
     }
 
-    float Heuristic(WorldModel next, WorldModel current,float cost)
+    float Heuristic(WorldModel next, WorldModel current)
     {
         var result = 10f;
 
@@ -285,12 +291,10 @@ public class PlayerController : MonoBehaviour
         result += current.hasAgreement ? 0 : gobAgreementCost/100;
 
         result -= result - current.money/100 > 0 ? (result - current.money)/100: result;
-        
 
-        if(next.money == current.money + stealBounty && stealBounty != salary)
-        {
-            result += 1;
-        }
+        //Esta variable esta agregada para que no se la pase robando
+        result += current.stealCount;
+        
 
         if (next.isNarco)
             result = 0f;

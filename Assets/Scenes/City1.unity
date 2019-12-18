@@ -5398,7 +5398,7 @@ GameObject:
   - component: {fileID: 82183454}
   - component: {fileID: 82183457}
   m_Layer: 0
-  m_Name: Player
+  m_Name: Player 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5449,7 +5449,7 @@ MonoBehaviour:
   acordPrice: 400
   salary: 100
   kidnapBounty: 400
-  stealBounty: 99
+  stealBounty: 100
   plantMariaCost: 2
   getSeedCost: 3
   beNarcoCost: 0

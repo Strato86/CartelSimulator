@@ -10,6 +10,7 @@ public class WorldModel
     public string weapon;
     public bool hasAgreement;
     public bool isNarco;
+    public int stealCount;
     
     public static bool IsEqual(WorldModel a, WorldModel b)
     {
@@ -18,7 +19,8 @@ public class WorldModel
             a.money == b.money &&
             a.weapon == b.weapon &&
             a.hasAgreement == b.hasAgreement &&
-            a.isNarco == b.isNarco;
+            a.isNarco == b.isNarco &&
+            a.stealCount == b.stealCount;
     }
 
     public static WorldModel Clone(WorldModel baseModel)
@@ -30,6 +32,7 @@ public class WorldModel
         clone.weapon = baseModel.weapon;
         clone.hasAgreement = baseModel.hasAgreement;
         clone.isNarco = baseModel.isNarco;
+        clone.stealCount = baseModel.stealCount;
 
         return clone;
     }
