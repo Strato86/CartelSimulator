@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+
 
 public class GameManager : MonoBehaviour
 {
@@ -9,6 +11,7 @@ public class GameManager : MonoBehaviour
 
     public PlayerController[] players;
     public Camera[] cameras;
+    public Canvas generalCanvas;
 
     int activeCamera;
 
@@ -27,6 +30,7 @@ public class GameManager : MonoBehaviour
             c.enabled = false;
         }
         cameras[activeCamera].enabled = true;
+        generalCanvas.enabled = false;
     }
 
     public void WinGame(string playerName)
@@ -36,6 +40,9 @@ public class GameManager : MonoBehaviour
             p.Stop();
         }
         Debug.Log(playerName + " has WON!!!");
+        var text = generalCanvas.GetComponentInChildren<Text>();
+        text.text = playerName + " has WON!!!";
+        generalCanvas.enabled = true;
     }
 
     private void Update()
